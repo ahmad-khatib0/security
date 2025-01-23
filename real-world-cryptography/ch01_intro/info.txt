@@ -1,0 +1,98 @@
+- NIST is a United States agency whose role is to define standards and develop guidelines for use in 
+  government-related functions as well as other public or private organizations. Like AES, it has 
+  standardized many widely used cryptographic primitives.
+
+- The idea to build cryptographic standards in the open is related to a concept often referred to as 
+  Kerckhoffs’ principle, which can be understood as something like this: it would be foolish to rely on 
+  our enemies not to discover what algorithms we use because they most likely will. Instead, let’s
+  be open about them.
+
+- Recaping Diffie-Hellman process
+  1. Alice and Bob exchange their public keys, which masks their respective private keys and agree
+     upon using a common key
+  2. With the other participant’s public key and their respective private key, 
+     they can compute a shared secret.
+  3. An adversary who observes the exchange of public keys doesn’t have 
+     enough information to compute the shared secret.
+
+
+- In practice, a DH key exchange is quite insecure: Because Queen Alice accepts any public key she receives
+  as being Lord Bob’s pub- lic key, I could intercept the exchange and replace it with mine, which would 
+  allow me to impersonate Lord Bob to Queen Alice (man-in-the-middle MITM attack)
+
+- Public key cryptography does not solve the problem of trust, but it
+  simplifies its establishment (especially when the number of participants is large).
+
+- The invention of the DH key exchange algorithm was quickly followed by the invention of the RSA algorithm
+  named after Ron Rivest, Adi Shamir, and Leonard Adleman. RSA contains two different primitives: a public
+  key encryption algorithm (or asymmetric encryption) and a (digital) signature scheme. Both primitives 
+  are part of the larger class of cryptographic algorithms called asymmetric cryptography.
+
+-  Asymmetric encryption
+  It works with two different keys: a public key and a private key.
+  It provides an asymmetric point of view: anyone can encrypt with the public key,
+   but only the owner of the private key can decrypt messages.
+
+- Classifying and abstracting cryptography
+  Symmetric cryptography (or secret key cryptography)—A single secret is used. If several
+   participants are aware of the secret, it is called a shared secret.
+  Asymmetric cryptography (or public key cryptography)—Participants have an asymmetrical view of 
+   the secrets. For example, some will have knowledge of a public key, while some will have knowledge
+   of both a public and private key.
+   
+- Another way of dividing cryptography can be
+  Math-based constructions—These rely on mathematical problems like factoring numbers. (The RSA 
+   algorithm for digital signatures and asymmetric encryption is an example of such a construction.)
+  Heuristic-based constructions —These rely on observations and statistical analysis by cryptanalysts.
+   (AES for symmetric encryption is an example of such a construction.)
+
+- Most of the cryptographic primitives and protocols we’ll learn about in this book provide one 
+  or two of the following properties:
+    Confidentiality— It’s about masking and protecting some information from the wrong eyes. 
+     For example, encryption masks the messages in transit.
+    Authentication—It’s about identifying who we are talking to. For example, this can be helpful 
+     in making sure that messages we receive indeed come from Queen Alice.
+
+- The NIST is tasked with publishing the Federal Information Processing Standards (FIPS), which mandates 
+  what cryptographic algorithms can be used by companies that deal with the US government. While many of
+  these standards were success stories and people tend to have a lot of trust in standards being pushed 
+  by government agencies, there is (unfortunately) a lot to say about failures.
+  In 2013, following revelations from Edward Snowden, it was discovered that NSA had purposefully and 
+  successfully pushed for the inclusion of backdoor algorithms in standards (see “Dual EC: A Standardized 
+  Back Door” by Bernstein et al.), which included a hidden switch that allowed NSA, and only the NSA, to
+  predict your secrets. These backdoors can be thought of as magic passwords that allow the government 
+  (and only it, supposedly) to subvert your encryption. Following this, the cryptographic community lost
+  a lot of confidence in standards and suggestions coming from governmental bodies. Recently, in 2019, 
+  it was found that the Russian standard GOST had been a victim of the same treatment.
+
+- A patent expires. A patent in cryptography usually means that nobody will use the algorithm. Once the 
+  patent expires, it is not uncommon to see a renewed interest in the primitive. The most popular example
+  is probably Schnorr signatures, which were the first contender to become the most popular signature 
+  scheme until Schnorr himself patented the algorithm in 1989. This led to the NIST standardizing a 
+  poorer algorithm called Digital Signature Algorithm (DSA), which became the go-to signature scheme at
+  the time, but doesn’t see much use nowadays. The patent over Schnorr signatures expired in 2008, 
+  and the algorithm has since started regaining popularity.
+
+
+Summary
+  A protocol is a step-by-step recipe where multiple participants attempt to achieve something
+   like exchanging confidential messages.
+  Cryptography is about augmenting protocols to secure them in adversarial 
+   settings. It often requires secrets.
+  A cryptographic primitive is a type of cryptographic algorithm. For example, symmetric encryption
+   is a cryptographic primitive, while AES is a specific symmetric encryption algorithm.
+  One way to classify the different cryptographic primitives is to split them into two types: symmetric
+   and asymmetric cryptography. Symmetric cryptography uses a single key (as you saw with symmetric 
+   encryption), while asymmetric cryptography makes use of different keys (as you saw with key exchanges, 
+   asymmetric encryption, and digital signatures).
+  Cryptographic properties are hard to classify, but they often aim to provide one of these two 
+   properties: authentication or confidentiality. Authentication is about verifying the authenticity 
+   of something or someone, while confidentiality is about the privacy of data or identities.
+  Real-world cryptography matters because it is ubiquitous in technological applications, while 
+   theoretical cryptography is often less useful in practice.
+  Most of the cryptographic primitives contained in this book were agreed on 
+   after long standardization processes.
+  Cryptography is complicated, and there are many dangers in implementing 
+   or using cryptographic primitives.
+
+
