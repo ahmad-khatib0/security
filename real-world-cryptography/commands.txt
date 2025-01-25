@@ -1,0 +1,6 @@
+
+# hashing something
+$ openssl dgst -sha256 <content>
+$ echo -n "hello" | openssl dgst -sha256
+
+

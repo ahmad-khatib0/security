@@ -1,0 +1,176 @@
+
+- The input of this function can be of any size. It can even be empty. The output is always of the same 
+  length and deterministic: it always produces the same result if given the same input. In our example, 
+  SHA-256 always provides an output of 256 bits (32 bytes), which is always encoded as 64 alphanumeric 
+  characters in hexadecimal. One major property of a hash function is that one cannot revert the algorithm, 
+  meaning that one shouldn’t be able to find the input from just the output. We say that hash functions 
+  are one-way.
+
+- Security properties of a hash function: 
+  . The first one is pre-image resistance: This property ensures that no one should be
+    able to reverse the hash function in order to recover the input given an output
+  . The second property is second pre-image resistance: The property says the following: if I give 
+    you an input and the digest it hashes to, you should not be able to find a different
+    input that hashes to the same digest. 
+  . the third property is collision resistance. It guarantees that no one should be
+    able to produce two different inputs that hash to the same output
+  
+- The random oracle
+  In addition, hash functions are usually designed so that their digests are unpredictable and random. 
+  This is useful because one cannot always prove a protocol to be secure, thanks to one of the security 
+  properties of a hash function we talked about (like collision resistance, for example). Many protocols 
+  are instead proven in the random oracle model, where a fictional and ideal participant called a random 
+  oracle is used. In this type of protocol, one can send any inputs as requests to that random oracle, 
+  which is said to return completely random outputs in response, and like a hash function, giving it the 
+  same input twice returns the same output twice. Proofs in this model are sometimes controversial as we 
+  don’t know for sure if we can replace these random oracles with real hash functions (in practice). 
+  Yet, many legitimate protocols are proven secure using this method, where hash functions are seen
+  as more ideal than they probably are.
+
+- Let’s imagine the following extreme example. We have a hash function that produces outputs of length 
+  2 bits in a uniformly random fashion (meaning that it will output 00 25% of the time, 01 25% of the 
+  time, and so on). You’re not going to have to do too much work to produce a collision: after hashing 
+  a few random input strings, you should be able to find two that hash to the same output. For this reason,
+  there is a minimum output size that a hash function must produce in practice: 256 bits (or 32 bytes).
+  With this large an output, collisions should be out of reach 
+
+- In real-world cryptography, algorithms aim for a minimum of 128 bits of security. It means that an 
+  attacker who wants to break an algorithm (providing 128-bit security) has to perform around 2128 operations
+  (for example, trying all the possible input strings of length 128 bits would take 2128 operations)
+
+- The birthday bound
+  The birthday bound takes its roots from probability theory in which the birthday problem reveals some 
+  unintuitive results. How many people do you need in a room so that with at least a 50% chance, two 
+  people share the same birthday (that’s a collision). It turns out that 23 people taken at random are 
+  enough to reach these odds!. Weird right?
+  This is called the birthday paradox. In practice, when we randomly generate strings from 
+  a space of 2N possibilities, you can expect with a 50% chance that someone will find a 
+  collision after having generated approximately 2N/2 strings.
+
+- If our hash function generates random outputs of 256 bits, the space of all outputs is of size 
+  2256. This means that collisions can be found with good probability after generating 2128 digests 
+  (due to the birthday bound). This is the number we’re aiming for, and this is why hash functions
+  at a minimum must provide 256-bit outputs.
+
+- Commitments in cryptography generally try to achieve two properties:
+    Hiding—A commitment must hide the underlying value.
+    Binding—A commitment must hide a single value. In other words, if you commit to a value x,
+     you shouldn’t be able to later successfully reveal a different value y.
+
+- Functions like CRC32 are not cryptographic hash functions but error-detecting code functions. While they 
+  helpfully detect some simple errors, they provide none of the previously mentioned security properties 
+  and are not to be confused with the hash functions we are talking about (even though they might share 
+  the name sometimes). Their output is usually referred to as a checksum.
+  Second, popular hash functions like MD5 and SHA-1 are considered broken nowadays. While they were 
+  both the standardized and widely accepted hash functions of the 1990s, MD5 and SHA-1 were shown 
+  to be broken in 2004 and 2016, respectively,
+
+- The most widely adopted hash function is the Secure Hash Algorithm 2 (SHA-2). SHA-2 was invented by NSA 
+  and standardized by NIST in 2001. It was meant to add itself to the aging Secure Hash Algorithm 1 (SHA-1)
+  already standardized by NIST. SHA-2 provides 4 different versions, producing outputs of 224, 256, 384, 
+  or 512 bits. Their respective names omit the version of the algorithm: SHA-224, SHA-256, SHA-384, and
+  SHA-512. In addition, two other versions, SHA-512/224 and SHA-512/256, provide 224-bit and 256-bit 
+  output, respectively, by truncating the result of SHA-512.
+
+
+- WARNING
+  While SHA-2 is a perfectly fine hash function to use, it is not suitable for hashing secrets. This is 
+  because of a downside of the Merkle–Damgård construction, which makes SHA-2 vulnerable to an attack 
+  (called a length-extension attack) if used to hash secrets.
+
+- SHA-3 is built with a sponge construction, a different construction from Merkle–Damgård that was 
+  invented as part of the SHA-3 competition. It is based on a particular permutation called keccak-f
+  that takes an input and returns an output of the same size.
+
+- padding is an important step of the process to distinguish between inputs like 0 and 00, 
+
+- The sponge is specified with a 1,600-bit permutation using different values for r and c, 
+  depending on the security advertised by the different versions of SHA-3.
+
+- SHA-3 is a random oracle
+  I talked about random oracles earlier: an ideal and fictional construction that returns perfectly 
+  random responses to queries and repeats itself if we query it with the same input twice. It turns out
+  that the sponge construction behaves closely to a random oracle, as long as the permutation used by 
+  the construction looks random enough. How do we prove such security properties on the permutation? 
+  Our best approach is to try to break it, many times, until we gain strong confidence in its design 
+  (which is what happened during the SHA-3 competition). The fact that SHA-3 can be modeled as a random
+  oracle instantly gives it the security properties we would expect from a hash function.
+
+- SHAKE and cSHAKE: Two extendable output functions (XOF): 
+  SHAKE, specified in FIPS 202 along with SHA-3, can be seen as a hash function that returns an 
+  output of an arbitrary length. SHAKE is fundamentally the same construction as SHA-3, except 
+  that it is faster and permutes as much as you want it to permute in the squeezing phase. Producing
+  outputs of different sizes is quite useful, not only to create a digest, but also to create 
+  random numbers, to derive keys, and so on
+  
+- cSHAKE is pretty much exactly like SHAKE, except that it also takes a customization string. 
+  This customization string (like salt) can be empty, or it can be any string you want. 
+
+- WARNING
+  NIST tends to specify algorithms that take parameters in bits instead of bytes. In the example, 
+  a length of 256 bits was requested. Imagine if you had requested a length of 16 bytes and got 2 
+  bytes instead, due to the program thinking you had requested 16 bits of output. This issue is 
+  sometimes called a bit attack.
+
+- TupleHash, which is based on cSHAKE and specified in the same standard as cSHAKE. TupleHash
+  is an interesting function that allows one to hash a tuple (a list of something)
+
+- This is an implementation of a transaction for a cryptocurrency
+    $ echo -n "Alice""Bob""100""15" | openssl dgst -sha3-256 
+  can we temper with it? without changing the digest? 
+  What happens if we move one digit from the fee field to the amount field? 
+    $ echo -n "Alice""Bob""1001""5" | openssl dgst -sha3-256
+  transaction will hashes to the same digest Alice signed:
+  34d6b397c7f2e8a303fc8e39d283771c0397dad74cef08376e27483efc29bb02
+  And thus, a MITM attacker who would want Bob to receive a bit more money would be able to modify the
+  transaction without invalidating the signature. this is what TupleHash solves It allows you to 
+  unambiguously hash a list of fields by using non-ambiguous encoding What happens in reality is 
+  something close to the following (with the || string concatenation operation): 
+  cSHAKE(
+    input="5"||"Alice"||"3"||"Bob"||"3"||"100"||"2"||"10",
+    output_length=256, 
+    custom_string="TupleHash"+"anything you want"
+   )
+  The input is this time constructed by prefixing each field of the transaction with its length. 
+  Take a minute to understand why this solves our issue. In general, one can use any hash function safely
+  by always making sure to serialize the input before hashing it. Serializing the input means that there 
+  always exists a way to deserialize it (meaning to recover the original input). If one can deserialize 
+  the data, then there isn’t any ambiguity on field delimitation.
+
+- Hashing passwords: 
+    If an attacker retrieves hashed passwords, a brute force attack or an exhaustive search (trying 
+     all possible passwords) can be undertaken. This would test each attempt against the whole database.
+     Ideally, we would want an attacker to only be able to attack one hashed password at a time.
+    Hash functions are supposed to be as fast. Attackers can leverage this to brute force (many, 
+     many passwords per second). Ideally, we would have a mechanism to slow down such attacks.
+
+. The first issue has been commonly solved by using salts, which are random values that are public
+  and different for each user. We use a salt along with the user’s password when hashing it,
+. The second issue is solved with password hashes, which are designed to be slow. 
+  The current state-of-the-art choice for this is Argon2,
+  
+- The term memory hard means that the algorithm can only be optimized through the optimization of memory
+  access. In other words, optimizing the rest doesn’t gain you much. As optimizing memory access is 
+  limited even with dedicated hardware (there’s only so much cache you can put around a CPU), memory-hard
+  functions are slow to run on any type of device. This is a desired property when you want to prevent 
+  attackers from getting a non-negligible speed advantage in evaluating a function.
+
+Summary
+  A hash function provides collision resistance, pre-image resistance, and second pre-image resistance.
+  – Pre-image resistance means that one shouldn’t be able to find the input that produced a digest.
+  – Second pre-image resistance means that from an input and its digest, one shouldn’t be able to
+    find a different input that hashes to the same digest.
+  – Collision resistance means that one shouldn’t be able to find two random inputs that hash to 
+    the same output.
+  The most widely adopted hash function is SHA-2, while the recommended hash function is SHA-3 due 
+   to SHA-2’s lack of resistance to length-extension attacks.
+  SHAKE is an extendable output function (XOF) that acts like a hash function but provides an 
+   arbitrary-length digest.
+  cSHAKE (for customizable SHAKE) allows one to easily create instances of SHAKE that behave 
+   like different XOFs. This is called domain separation.
+  Objects should be serialized before being hashed in order to avoid breaking the second pre-image
+   resistance of the hash function. Algorithms like TupleHash automatically take care of this.
+  Hashing passwords make use of slower hash functions designed specifically for
+   that purpose. Argon2 is the state-of-the-art choice.
+
+
