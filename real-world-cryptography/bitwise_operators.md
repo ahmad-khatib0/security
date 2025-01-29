@@ -185,3 +185,53 @@ converting 11 to decimal gives you 3.
 
 So either binary way or decimal way, you'll get the same answer.
 
+## 6. Bitwise Left SHIFT ("<<")
+
+Of course, it is the opposite of the Right shift bitwise operation.
+
+The rule for BITWISE Left shift is as follows:
+- Multiply the natural number by 2 and round down.
+- If it's a binary, move backward by the number of shift
+
+Examples:
+
+(6 << 1) becomes 6 x 2 = 12.
+
+(6 << 2) becomes 6 x (2*2) = 24.
+
+(6 << 3) becomes 6 x (2*2*2) = 48.
+
+For binary, move the digit backward:
+
+(110 << 1) becomes 1100
+(110 << 2) becomes 11000
+(110 << 3) becomes 110000
+
+If you convert each of this binary to decimal, you should get 12, 24 and 48 as we've gotten above.
+
+## 7 Bitwise Logical Right SHIFT (>>>)
+
+Logical Right SHIFT is just like ordinary or arithmetic Right shift but, in Logical right shift, you fill zero from the back.
+
+Examples:
+
+- (110 >>> 1) becomes 011
+- (110 >>> 2) becomes 001
+
+So basically, Logical right shift is simply adding the Zero you're supposed to throw away 
+(as in ordinary right shift) to the back of the number.
+
+Guess…. (111000 >>> 2) becomes???
+
+001110!
+
+For positive numbers like 6, 8 etc, the answer and rule will still be the same as the normal right shift.
+
+So therefore (6 >>> 1) is 6 ÷ 2 which is 3.
+
+If you convert 011 to decimal, you'll get 3 as well.
+
+Zero coming first in binary really can be ignored, but logical Right shift decided to keep, logical indeed.
+
+In some programming languages, they only have the Arithmetic Right SHIFT (>>).
+

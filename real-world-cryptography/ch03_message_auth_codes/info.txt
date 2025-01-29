@@ -1,0 +1,85 @@
+- Mix a hash function with a secret key and you obtain something called a message
+  authentication code (MAC), a cryptographic primitive to protect the integrity of data.
+
+- A MAC is a secret key algorithm that takes an input, like a hash function, but it also takes 
+  a secret key (who saw that coming?) It then produces a unique output called an authentication 
+  tag. This process is deterministic; given the same secret key and the same message, a MAC produces
+  the same authentication tag
+
+- Security properties of a MAC: 
+    MACs are resistant against forgery of authentication tags.
+    An authentication tag needs to be of a minimum length to be secure.
+    Messages can be replayed if authenticated naively.
+    Verifying an authentication tag is prone to bugs.
+
+1. Forgery of authentication tag: 
+   A MAC usually comes with a proof that even if an attacker can ask you to produce the 
+   authentication tags for a large number of arbitrary messages, the attacker should still 
+   not be able to forge an authentication tag on a never-seen-before message by themselves.
+2. Lengths of authentication tag: 
+   A 128-bit authentication tag requires 264 online queries from the attacker in order to have 
+   a 50% chance to find collisions, which is deemed large enough. 
+3. Replay attacks: 
+   using a counter can eliminate this kind of attacks
+4. Verifying authentication tags in constant time: 
+   This means the comparison should always take the same time, assuming the received one is of the 
+   correct size. If the time it takes to compare the two authentication tags is not constant time, it 
+   is probably because it returns the moment the two tags differ. This usually gives enough information 
+   to enable attacks that can recreate byte by byte a valid authentication tag by measuring how long it
+   takes for the verification to finish.
+
+- Deriving keys
+  One particularity of MACs is that they're often designed to produce bytes that look random 
+  (like hash functions). You can use this property to implement a single key to generate random 
+  numbers or to produce more keys
+
+- The pseudorandom function (PRF)
+  Imagine the set of all functions that take a variable-length input and produce a random output of a 
+  fixed size. If we could pick a function at random from this set and use it as a MAC (without a key), 
+  it would be swell. We would just have to agree on which function (kind of like agreeing on a key). 
+  Unfortunately, we can’t have such a set as it is way too large, but we can emulate picking such a 
+  random function by designing something close enough: we call such constructions pseudorandom func-
+  tions (PRFs). HMAC and most practical MACs are such constructions. They are randomized by a key 
+  argument instead. Choosing a different key is like picking a random function.
+
+- Hash tables
+  Many major applications use a MAC with a random key in place of the non-cryptographic hash function. 
+  This is the case for many programming languages (like Rust, Python, and Ruby), or for major applications 
+  (like the Linux kernel). They all make use of SipHash, a poorly-named MAC optimized for short 
+  authentication tags, with a random key generated at the start of the program.
+
+- HMAC, a hash-based MAC: 
+  Under the hood, HMAC follows these steps: 
+  1. It first creates two keys from the main key: k1 = k ⊕ ipad and k2 = k ⊕ opad, where ipad 
+     (inner padding) and opad (outer padding) are constants, and ⊕ is the symbol for the XOR operation.
+  2. It then concatenates a key, k1, with the message and hashes it.
+  3. The result is concatenated with a key, k2, and hashed one more time.
+  4. This produces the final authentication tag.
+
+- Because HMAC is customizable, the size of its authentication tag is dictated by the hash function 
+  used. For example, HMAC-SHA256 makes use of SHA-256 and pro- duces an authentication tag of 256 bits, 
+  HMAC-SHA512 produces an authentication tag of 512 bits, and so on.
+
+- KMAC, a MAC based on cSHAKE: 
+  
+- One should never hash secrets with SHA-2. Of course, there are several other ways to do it correctly 
+  (for example, SHA-256(k || message || k) works), which is what HMAC provides. Thus, use HMAC if you 
+  want to use SHA-2 and use KMAC if you prefer SHA-3.
+
+Summary
+  Message authentication codes (MACs) are symmetric cryptographic algorithms that allow one or more 
+   parties who share the same key to verify the integrity and authenticity of messages.
+– To verify the authenticity of a message and its associated authentication tag, one can recompute the 
+  authentication tag of the message and a secret key, and then match the two authentication tags. If 
+  they differ, the message has been tampered with.
+– Always compare a received authentication tag with a computed one in constant time.
+  While MACs protect the integrity of messages by default, they do not detect when messages are replayed.
+  Standardized and well-accepted MACs are the HMAC and the KMAC standards. One can use HMAC with 
+   different hash functions. In practice, HMAC is often used with the SHA-2 hash function.
+  Authentication tags should be of a minimum length of 128 bits to prevent collisions
+   and forgery of authentication tags.
+  Never use SHA-256 directly to build a MAC as it can be done incorrectly. Always
+   use a function like HMAC to do this.
+
+
+
