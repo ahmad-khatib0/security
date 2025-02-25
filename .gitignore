@@ -1,1 +1,32 @@
 target
+
+dist
+vendor
+node_modules
+
+# testing
+/coverage
+.DS_Store
+.env.local
+
+## Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+## Maven
+target/
+## Gradle
+build/
+.gradle
+.classpath
+.project
+
+# latex
+*.synctex.gz
+*.aux
+document.pdf
+*.out
+*.fls
+*.fdb_latexmk
