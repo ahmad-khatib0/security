@@ -1,0 +1,73 @@
+- The Advanced Encryption Standard (AES) block cipher In 1997
+  NIST started an open competition for an Advanced Encryption Standard (AES), aimed at replacing the Data
+  Encryption Standard (DES) algorithm, their previous standard for encryption that was starting to show 
+  signs of age. The competition lasted three years, during which time, 15 different designs were submitted 
+  At the end of the competition, only one submission, Rijndael, by Vincent Rijmen and Joan Daemen was 
+  nominated as the winner. In 2001, NIST released AES as part of the FIPS (Federal Information Processing 
+  Standards) 197 publication. AES, the algorithm described in the FIPS standard, is still the main cipher 
+  used today
+
+- How much security does AES provide?
+  AES offers three different versions: AES-128 takes a key of 128 bits (16 bytes), AES-192 takes 
+  a key of 192 bits (24 bytes), and AES-256 takes a key of 256 bits (32 bytes). The length of the 
+  key dictates the level of security, most applications make use of AES-128 as it provides enough 
+  security (128 bits of security).
+
+- In plain English, 2^128 is 340 undecillion 282 decillion 366 nonillion 920 octillion 938 septillion
+  463 sextillion 463 quintillion 374 quadrillion 607 trillion 431 billion 768 million 211 thousand 456. 
+
+- Looking at the interface of AES for encryption, we see the following:
+  The algorithm takes a variable-length key as discussed previously.
+  It also takes a plaintext of exactly 128 bits.
+  It outputs a ciphertext of exactly 128 bits.
+
+- Because AES encrypts a fixed-size plaintext, we call it a block cipher.
+
+- In AES block cipher By iterating many times, the cipher transforms plaintext into something that looks
+  nothing like the original plaintext. The slightest change in the plaintext also returns a completely
+  different ciphertext. This principle is called the avalanche effect.
+
+- many CPU vendors have implemented AES in hardware. For example, AES New Instructions (AES-NI) is a set
+  of instructions available in Intel and AMD CPUs, which can be used to efficiently implement encryption
+  and decryption for AES. These special instructions make AES extremely fast in practice.
+
+- The problem with a block cipher is that it can only encrypt a block by itself. To encrypt something
+  that is not exactly 128 bits, we must use a padding as well as a mode of operation.
+
+- ECB penguin
+  So far, to encrypt a long message, you just divided it into blocks of 16 bytes (and perhaps you padded
+  the last block). This naive way is called the electronic codebook (ECB) mode of operation. As you learned,
+  encryption is deterministic, and so encrypting the same block of plaintext twice leads to the same 
+  ciphertext. This means that by encrypting each block individually, the resulting ciphertext might have 
+  repeating patterns. This might seem fine, but allowing these repetitions lead to many problems. The most
+  obvious one is that they leak information about the plaintext. The most famous illustration of this is 
+  the ECB penguin, pictured in figure 4.7.
+
+- To encrypt more than 128 bits of plaintext safely, better modes of operation exist that “randomize” the
+  encryption. One of the most popular modes of operation for AES is cipher block chaining (CBC). CBC works
+  for any deterministic block cipher (not just AES) by taking an additional value called an initialization
+  vector (IV) to randomize the encryption. Because of this, the IV is the length of the block size 
+  (16 bytes for AES) and must be random and unpredictable.
+
+- WARNING
+  When an IV repeats or is predictable, the encryption becomes deterministic again, and a number of clever
+  attacks become possible. This was the case with the famous BEAST attack (Browser Exploit Against SSL/TLS)
+  on the TLS protocol. Note also that other algorithms might have different requirements for IVs. This 
+  is why it is always important to read the manual. Dangerous details lie in fine print.
+
+- For AES-CBC, we usually use HMAC (for hash-based MAC ) in combination with the SHA-256 hash function 
+  to provide integrity. We then apply the MAC after padding the plaintext and encrypting it over both 
+  the cipher-text and the IV; otherwise, an attacker can still modify the IV without being caught.
+
+- WARNING
+  AES-CBC-HMAC is not the most developer-friendly construction.
+  It is often poorly implemented and has some dangerous pitfalls when not
+  used correctly (for example, the IV of each encryption must be unpredictable).
+
+- What’s authenticated encryption with associated data (AEAD)?
+  The most current way of encrypting data is to use an all-in-one construction called authenticated 
+  encryption with associated data (AEAD). The construction is extremely close to what AES-CBC-HMAC 
+  provides as it also offers confidentiality of your plaintexts while detecting any modifications that 
+  could have occurred on the ciphertexts. What’s more, it provides a way to authenticate associated data.
+
+

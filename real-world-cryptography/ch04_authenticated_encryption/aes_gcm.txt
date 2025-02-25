@@ -1,0 +1,41 @@
+- The AES-GCM AEAD
+  The most widely used AEAD is AES with the Galois/Counter Mode (also abbreviated AES-GCM). It was designed
+  for high performance by taking advantage of hardware support for AES and by using a MAC (GMAC) that can 
+  be implemented efficiently. AES-GCM has been included in NIST’s Special Publication (SP 800-38D) since
+  2007, and it is the main cipher used in cryptographic protocols, including several versions of the TLS 
+  protocol that is used to secure connections to websites on the internet. Effectively, we can say that 
+  AES-GCM encrypts the web.
+
+- AES-GCM combines the Counter (CTR) mode of operation with the GMAC message authentication code. First,
+  let’s see how CTR mode works with AES. Figure 4.13 shows how AES is used with CTR mode.
+  AES-CTR uses AES to encrypt a nonce concatenated with a number (starting at 1)
+  instead of the plaintext. This additional argument, “a nonce for number once,” serves the same purpose 
+  as an IV: it allows the mode of operation to randomize the AES encryption. The requirements are a bit 
+  different from the IV of CBC mode, however. A nonce needs to be unique but not unpredictable. Once this
+  16-byte block is encrypted, the result is called a keystream, and it is XORed with the actual plaintext 
+  to produce the encryption.
+
+- The nonce in AES-CTR is 96 bits (12 bytes) and takes most of the 16 bytes to be encrypted. The 32 bits
+  (4 bytes) left serves as a counter, starting from 1 and incremented for each block encryption until it
+  reaches its maximum value at 24×8 – 1 = 4,294,967,295. This means that, at most, 4,294,967,295 blocks
+  of 128 bits can be encrypted with the same nonce (so less than 69 GBs).
+
+- The second part of AES-GCM is GMAC. It is a MAC constructed from a keyed hash (called GHASH). In technical
+  terms, GHASH is an almost XORed universal hash (AXU), which is also called a difference unpredictable 
+  function (DUF). The requirement of such a function is weaker than a hash. For example, an AXU does not 
+  need to be collision resistant. Thanks to this, GHASH can be significantly faster.
+
+- To hash something with GHASH, we break the input into blocks of 16 bytes and then hash them in a way
+  similar to CBC mode. As this hash takes a key as input, it can theoretically be used as a MAC, but 
+  only once (otherwise, the algorithm breaks) it’s a one-time MAC. As this is not ideal for us, we use
+  a technique (due to Wegman-Carter) to transform GHASH into a many-time MAC.
+  
+- Beyond birthday-bound security
+  2^30 messages is quite a large number of messages. It might never be reached in many scenarios, but 
+  real-world cryptography often pushes the limit of what is consid- ered reasonable. Some long-lived 
+  systems need to encrypt many, many messages per second, eventually reaching these limits. Visa, for 
+  example, processes 150 million transactions per day. If it needs to encrypt those with a unique key, 
+  it would reach the limit of 230 messages in only a week. In these extreme cases, rekeying (changing 
+  the key used to encrypt) can be a solution. There also exists a research field called beyond 
+  birthday-bound security that aims to improve the maximum number of messages that can be encrypted 
+  with the same key.

@@ -1,0 +1,30 @@
+
+- ChaCha20-Poly1305
+  The second AEAD I will talk about is ChaCha20-Poly1305. It is the combination of two
+  algorithms: the ChaCha20 stream cipher and the Poly1305 MAC. Both designed sepa-
+  rately by Daniel J. Bernstein to be fast when used in software, contrary to AES, which is
+  slow when hardware support is unavailable. In 2013, Google standardized the Cha-
+  Cha20-Poly1305 AEAD in order to make use of it in Android mobile phones relying
+  on low-end processors. Nowadays, it is widely adopted by internet protocols like
+  OpenSSH, TLS, and Noise.
+
+- Like all stream ciphers, the algorithm produces a keystream, a series of random bytes of the length of
+  the plaintext. It is then XORed with the plaintext to create the ciphertext. To decrypt, the same 
+  algorithm is used to produce the same keystream, which is XORed with the ciphertext to give back 
+  the plaintext. I illustrate both flows in figure 4.18.
+
+- Under the hood, ChaCha20 generates a keystream by repeatedly calling a block function to produce
+  many 64-byte blocks of keystream. The block function takes
+      A 256-bit (32-byte) key like AES-256
+      A 92-bit (12-byte) nonce like AES-GCM
+      A 32-bit (4-byte) counter like AES-GCM
+
+- The process to encrypt is the same as with AES-CTR. (I illustrate this flow in figure 4.19.)
+1 Run the block function, incrementing the counter every time, until enough
+  keystream is produced
+2 Truncate the keystream to the length of the plaintext
+3 XOR the keystream with the plaintext
+
+
+
+
