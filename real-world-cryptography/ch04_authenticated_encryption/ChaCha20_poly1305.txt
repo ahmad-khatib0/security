@@ -1,12 +1,11 @@
 
 - ChaCha20-Poly1305
   The second AEAD I will talk about is ChaCha20-Poly1305. It is the combination of two
-  algorithms: the ChaCha20 stream cipher and the Poly1305 MAC. Both designed sepa-
-  rately by Daniel J. Bernstein to be fast when used in software, contrary to AES, which is
-  slow when hardware support is unavailable. In 2013, Google standardized the Cha-
-  Cha20-Poly1305 AEAD in order to make use of it in Android mobile phones relying
-  on low-end processors. Nowadays, it is widely adopted by internet protocols like
-  OpenSSH, TLS, and Noise.
+  algorithms: the ChaCha20 stream cipher and the Poly1305 MAC. Both designed separately by 
+  Daniel J. Bernstein to be fast when used in software, contrary to AES, which is slow when 
+  hardware support is unavailable. In 2013, Google standardized the ChaCha20-Poly1305 AEAD in 
+  order to make use of it in Android mobile phones relying on low-end processors. Nowadays, 
+  it is widely adopted by internet protocols like OpenSSH, TLS, and Noise.
 
 - Like all stream ciphers, the algorithm produces a keystream, a series of random bytes of the length of
   the plaintext. It is then XORed with the plaintext to create the ciphertext. To decrypt, the same 
@@ -25,6 +24,47 @@
 2 Truncate the keystream to the length of the plaintext
 3 XOR the keystream with the plaintext
 
+- key wrapping algorithms do not take an additional nonce or IV and randomize their encryption
+  based on what they are encrypting. Thanks to this, they do not have to store an additional nonce 
+  or IV next to the ciphertexts.
 
+- The point of a nonce misuse-resistant algorithm is that encrypting two plaintexts with the same 
+  nonce only reveals if the two plaintexts are equal or not, and that’s it. It’s not great, but 
+  it’s obviously not as bad as leaking an authentication key. The scheme has gathered a lot of 
+  interest and has since been standardized in RFC 8452
+  
+  Disk encryption
+   To protect against bitflip attacks, large blocks (think thousands of bytes) of data are 
+   encrypted in a way that a single bitflip would scramble the decryption of the whole block. This 
+   way, an attack has more of a chance of crashing the device than accomplishing its goal. These 
+   constructions are called wide-block ciphers, although this approach has also been dubbed poor 
+   man’s authentication. Linux systems and some Android devices have adopted this approach using 
+   Adiantum, a wide-block construction wrapping the ChaCha cipher and standardized by Google in 
+   2019. Still, most devices use non-ideal solutions: both Microsoft and Apple make use of 
+   AES-XTS, which is unauthenticated and is not a wide-block cipher.
 
+  Database encryption
+   The simplest solution is called transparent data encryption (TDE) and simply encrypts selected 
+   columns. This works well in some scenarios, although one needs to be careful to authenticate 
+   associated data identifying the row and the column being encrypted; otherwise, encrypted 
+   content can be swapped.
+
+Summary
+  Encryption (or symmetric encryption) is a cryptographic primitive that can be used to protect 
+   the confidentiality of data. The security relies on a symmetric key that needs to remain secret.
+  Symmetric encryption needs to be authenticated (after which we call it authenticated encrption)
+   to be secure, as otherwise, ciphertexts can be tampered with.
+  Authenticated encryption can be constructed from a symmetric encryption algorithm by using a 
+   message authentication code. But best practice is to use an authenticated encryption with 
+   associated data (AEAD) algorithm as they are allin-one constructions that are harder to misuse.
+  Two parties can use authenticated encryption to hide their communications, as
+   long as they both have knowledge of the same symmetric key.
+  AES-GCM and ChaCha20-Poly1305 are the two most widely adopted AEADs.
+   Most applications nowadays use either one of these.
+  Reusing nonces breaks the authentication of AES-GCM and ChaCha20-Poly1305. Schemes like 
+   AES-GCM-SIV are nonce misuse resistant, while encryption of keys can avoid that problem as 
+   nonces are not necessary.
+  Real-world cryptography is about constraints, and AEADs cannot always fit every scenario. This 
+   is the case for database or disk encryption, for example, that require the development of new 
+   constructions.
 

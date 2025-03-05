@@ -45,7 +45,7 @@ You can safely remove all 0s that comes before the first 1, so that our final an
 So therefore (6 & 15) is 6.
 
 That's the simple logic behind the operation. Remember, you always have to convert any given 
-number to binary and ensure the two numbers are in the same shap
+number to binary and ensure the two numbers are in the same shape
 
 ```python
 def bitwise_and(x, y):
@@ -61,12 +61,12 @@ The rule for OR is:
 
 Using the same switches (6, 15). To find (6 | 15), we also do:
 
-conversion and having equal shape
+Conversion and having equal shape
 
 6 = 0000 0110
 15 = 0000 1111
 
-result
+Result
 
 (6 | 15) = 0000 1111
 
