@@ -1,0 +1,194 @@
+- A key exchange starts with both Alice and Bob generating some keys. To do this, they both use a 
+  key generation algorithm, which generates a key pair: a private key (or secret key) and a public 
+  key. Alice and Bob then send their respective public keys to each other. Public here means that 
+  adversaries can observe those without consequences. Alice then uses Bob’s public key with her own 
+  private key to compute the shared secret. Bob can, similarly, use his private key with Alice’s 
+  public key to obtain the same shared secret. I illustrate this in figure 5.1.
+
+- when both sides are authenticated, we call that a mutually authenticated key exchange.
+
+- Group theory
+  The DH key exchange is built on top of a field of mathematics called group theory,
+  which is the base of most public key cryptography today
+
+- What’s a group? It’s two things:
+  A set of elements
+  A special binary operation (like + or ×) defined on these elements
+- If the set and the operation manage to satisfy some properties, then we have a group.
+
+  Closure—Operating on two elements results in another element of the same set. For example,  
+   for two elements of the group a and b, a × b results in another group element.
+  Associativity—Operating on several elements at a time can be done in any order. For example, 
+   for three elements of the group a, b, and c, then a(bc) and (ab)c result in the same group 
+   element.
+  Identity element—Operating with this element does not change the result of the other operand. 
+   For example, we can define the identity element as 1 in our multiplicative group. For any group
+   element a, we have a × 1 = a.
+  Inverse element—Existing as an inverse to all group elements. For example, for any group
+   element a, there’s an inverse element a^–1 (also written as 1/a) such that a × a^–1 = 1 
+   (also written as a × 1/a = 1).
+
+- DH uses a group comprised of the set of strictly positive integers: 1, 2, 3, 4, ···, p – 1,
+  where p is a prime number and 1 is the identity element. Different standards specify different 
+  numbers for p, but intuitively, it has to be a large prime number for the group to be secure.
+
+- Modular arithmetic, intuitively, is about numbers that “wrap around” past a certain number
+  called a modulus. For example, if we set the modulus to be 5, we say that numbers past 5 go 
+  back to 1; for example, 6 becomes 1, 7 becomes 2, and so on.
+
+- A cyclic subgroup is a subgroup that can be generated from a single generator (or base). A 
+  generator generates a cyclic subgroup by multiplying itself over and over. For example, the 
+  generator 4 defines a subgroup consisting of the numbers 1 and 4:
+      4 mod 5 = 4
+      4 × 4 mod 5 = 1
+      4 × 4 × 4 mod 5 = 4 (we start again from the beginning)
+      4 × 4 × 4 × 4 mod 5 = 1
+      and so on
+    NOTE We can also write 4 × 4 × 4 as 4^3.
+
+  A group is a set of numbers with a binary operation that respects some properties 
+   (closure, associativity, identity element, inverse element).
+  DH works in the Galois group (a group with commutativity), formed by the set of strictly 
+   positive numbers up to a prime number (not included) and the modular multiplication.
+  In a DH group, every element is a generator of a subgroup.
+
+- The discrete logarithm problem: The basis of Diffie-Hellman
+  The security of the DH key exchange relies on the discrete logarithm problem in a
+  group, a problem believed to be hard to solve
+
+
+- Imagine that I take a generator, let’s say 3, and give you a random element among the ones it 
+  can generate, let’s say 2 = 3x mod 5 for some x unknown to you. Asking you “what is x?” is the 
+  same as asking you to find the discrete logarithm of 2 in base 3. Thus, the discrete logarithm 
+  problem in our group is about finding out how many times we multiplied the generator with itself
+  in order to produce a given group element. In our example group, you can quickly find that 3 is 
+  the answer (indeed, 3^3 = 2 mod 5). But if we picked a much larger prime number than 5, things 
+  get much more complicated: it becomes hard to solve. 
+  THIS IS THE SECRET SAUCE BEHIND DIFFIE-HELLMAN.
+  
+- how to generate a key pair in DH:
+  1 All the participants must agree on a large prime p and a generator g.
+  2 Each participant generates a random number x, which becomes their private key.
+  3 Each participant derives their public key as g^x mod p.
+
+- How do we use all of this math for our DH key exchange algorithm? Imagine that
+  Alice has a private key a and a public key A = g^a mod p.
+  Bob has a private key b and a public key B = g^b mod p.
+- With the knowledge of Bob’s public key, Alice can compute the shared secret as B^a mod p. 
+  Bob can do a similar computation with Alice’s public key and his own private key: A^b mod p. 
+  Naturally, we can see that these two calculations end up computing the same number:
+                      B^a = (g^b)^a = g^ab = (g^a)^b = A^b mod p
+
+- The group size (or order) is also specified as q = (p – 1)/2. This implies that both private 
+  keys and public keys will be around 2,048 bits size-wise. In practice, these are quite large 
+  sizes for keys (compare that with symmetric keys, for example, that are usually 128-bit long).
+  You will see in the next section that defining a group over the elliptic curves allow us to 
+  obtain much smaller keys for the same amount of security.
+
+
+- In Elliptic Curves addition operation is defined in the following way (Figure 5.9): 
+  1 Draw a line going through two points that you want to add. The line hits 
+    the curve at another point.
+  2 Draw a vertical line from this newly found point. The vertical line hits the curve
+    in yet another point.
+  3 This point is the result of adding the original two points together. 
+
+- There are two special cases where this rule won’t work. Let’s define these as well:
+  How do we add a point to itself? The answer is to draw the tangent to that point
+   (instead of drawing a line between two points).
+  What happens if the line we draw in step 1 (or step 2) does not hit the curve at any other
+  point? Well, this is embarrassing, and we need this special case to work and produce a result.
+  The solution is to define the result as a made-up point (something we make up). This newly 
+  invented point is called the point at infinity (that we usually write with a big letter O). 
+  Figure 5.10 illustrates these special cases.
+
+- We saw that to create a group on top of an elliptic curve, we need
+  An elliptic curve equation that defines a set of valid points.
+  A definition of what addition means in this set.
+  An imaginary point called a point at infinity.
+
+- Let’s take a point G and add it to itself x times to produce another point P via the
+  addition operation we defined. We can write that as P = G + ··· + G (x times) or use
+  some mathematical syntactic sugar to write that as P = [x]G, which reads x times G.
+  The elliptic curve discrete logarithm problem (ECDLP) is to find the number x from
+  knowing just P and G.
+
+- To generate a key pair in ECDH:
+  1 All the participants agree on an elliptic curve equation, a finite field (most likely a prime
+    number), and a generator G (usually called a base point in elliptic curve cryptography).
+  2 Each participant generates a random number x, which becomes their private key.
+  3 Each participant derives their public key as [x]G.
+
+- Let’s go back to defining ECDH. Imagine that
+  Alice has a private key a and a public key A = [a]G.
+  Bob has a private key b and a public key B = [b]G.
+. With the knowledge of Bob’s public key, Alice can compute the shared secret as [a]B.
+  Bob can do a similar computation with Alice’s public key and his own private key: [b]A.
+  Naturally, we can see that these two calculations end up computing the same number:
+                       [a]B = [a][b]G = [ab]G = [b][a]G = [b]A
+
+- P-256, is the most widely used curve on the internet. P-256 is defined with the short Weierstrass 
+  equation:         y^2 = x^3 + ax + b mod p      where
+  a = –3 and
+  b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+  p = 2^256 – 2^224 + 2^192 + 2^96 – 1
+  This defines a curve of prime order:
+  n = 115792089210356248762697446949407573529996955224135760342422259061068512044369
+  meaning that there are exactly n points on the curve (including the point at infinity).
+  The base point is specified as: 
+  G = (
+     48439561293906451759052585252797914202762949526041747995844080717082404635286,
+     36134250956749795798585127919587881956611106672985015071877198253568414405109
+  )
+
+- RFC 7748, “Elliptic Curves for Security,” which was published in 2016, specifies two curves:
+  Curve25519 and Curve448. Curve25519 offers approximately 128 bits of security, while Curve448 
+  offers around 224 bits of security for protocols: 
+  Curve25519 defined by the equation: y^2 = x^3 + 486662 x^2 + x mod p, where p = 2^255 – 19
+  Curve25519 has an order:  n = 2^252 + 27742317777372353535851937790883648493
+  and the base point used is 
+  G = (9, 14781619447589544791020593568409986887264606134616475288964881837755586237401)
+  The combination of ECDH with Curve25519 is often dubbed X25519.
+
+- Safe primes create secure groups because of two things:
+  The order of a multiplicative group modulo a prime p is calculated as p – 1.
+  The order of a group’s subgroups are the factors of the group’s order (this is the Lagrange theorem).
+
+- A small subgroup attack is an attack on key exchanges in which an attacker sends several invalid 
+  public keys to leak bits of your private key gradually, and where the invalid public keys are 
+  generators of small subgroups.
+
+- For example, an attacker could choose –1 (the generator of a subgroup of size 2) as public key and 
+  send it to you. By doing your part of the key exchange, the resulting shared secret is an element of 
+  the small subgroup (–1 or 1). This is because you just raised the small subgroup generator (the 
+  attacker’s public key) to the power of your private key. Depending on what you do with that shared 
+  secret, the attacker could guess what it is, and leak some information about your private key. With 
+  our example of malicious public key, if your private key was even, the shared secret would be 1, and 
+  if your private key was odd, the shared secret would be –1. As a result, the attacker learned one bit 
+  of information: the least significant bit of your private key. Many subgroups of different sizes can 
+  lead to more opportunities for the attacker to learn more about your private key until the entire key 
+  is recovered. Figure 5.15 illustrate this issue .
+
+- Ristretto, the internet draft soon-to-be RFC, is a construction that adds an extra layer of encoding 
+  to Curve25519, effectively simulating a curve of prime order (see https://tools.ietf.org/html/draft-hdevalence-cfrg-ristretto-01).
+  The construction has been gaining traction as it simplifies the security assumptions made by other 
+  types of cryptographic primitives that want to benefit from Curve25519 but want a prime-order field.
+  
+Summary
+  Unauthenticated key exchanges allow two parties to agree on a shared secret, while preventing any 
+   passive man-in-the-middle (MITM) attacker from being able to derive it as well.
+  An authenticated key exchange prevents an active MITM from impersonating one side of the connection,
+   while a mutually authenticated key exchange prevents an active MITM from impersonating both sides.
+  One can perform an authenticated key exchange by knowing the other party’s public key, but this 
+   doesn’t always scale and signatures will unlock more complex scenarios (see chapter 7).
+  Diffie-Hellman (DH) is the first key exchange algorithm invented and is still widely used.
+  The recommended standard to use for DH is RFC 7919, which includes several parameters to choose 
+   from. The smallest option is the recommended 2,048-bit prime parameter.
+  Elliptic Curve Diffie-Hellman (ECDH) has much smaller key sizes than DH. For 128 bits of 
+   security, DH needs 2,048-bit parameters, whereas ECDH needs 256- bit parameters.
+  The most widely used curves for ECDH are P-256 and Curve25519. Both provide 128 bits of 
+   security. For 256-bit security, P-521 and Curve448 are available in the same standards.
+  Make sure that implementations verify the validity of public keys you receive as
+   invalid keys are the source of many bugs.
+
+
