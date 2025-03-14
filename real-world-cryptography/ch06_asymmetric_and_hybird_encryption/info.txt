@@ -1,0 +1,86 @@
+- Using asymmetric encryption to perform a key exchange is usually done with an
+  algorithm called RSA (following the names of its inventors Rivest, Shamir, and Adleman)
+
+- Hybrid encryption
+  In practice, asymmetric encryption can only encrypt messages up to a certain length. For example,
+  the size of plaintext messages that can be encrypted by RSA are limited by the security parameters 
+  that were used during the generation of the key pair (and more specifically by the size of the 
+  modulus). Nowadays, with the security parameters used (4,096-bit modulus), the limit is approximately
+  500 ASCII characters—pretty small. Therefore, most applications make use of hybrid encryption, 
+  whose limitation is tied to the encryption limits of the authenticated encryption algorithm used.
+
+- Mixing asymmetric encryption and symmetric encryption to encrypt large amounts of data to a 
+  public key. We often call the first asymmetric part of the algorithm a key encapsulation 
+  mechanism (KEM) and the second symmetric part a data encapsulation mechanism (DEM).
+
+-   RSA-OAEP—The main standard to perform asymmetric encryption with RSA
+-   ECIES—The main standard to perform hybrid encryption with Elliptic Curve Diffie-Hellman (ECDH)
+
+- how to encrypt with RSA. To do this, we publish a public exponent e (for encryption) and a 
+  prime number p. (In reality p cannot be prime, but we’ll ignore that for a moment.) To encrypt 
+  a message m, one computes       ciphertext = m^e mod p
+  For example, to encrypt the message m = 2 with e = 2 and p = 5, we compute
+                                  ciphertext = 2^2 mod 5 = 4
+  And this is the idea behind encryption with RSA!
+- how to implement decryption: find out how much you need to exponentiate a ciphertext in order 
+  to recover the original generator (which is the message). Let’s say that you know such a number,
+  which we’ll call the private exponent d (d for decryption). If you receive
+                              ciphertext = message^e mod p
+  you should be able to raise it to the power d to recover the message:
+                      ciphertext^d = (message^e)^d = message^(e × d) = message mod p
+
+- The order of an RSA group
+  You can calculate the order of the multiplicative group modulo a number N with Euler’s totient 
+  function (N), which returns the count of numbers that are co-prime with N. For example, 5 
+  and 6 are co-prime because the only positive integer that divides both of them is 1. On the 
+  other hand, 10 and 15 are not because 1 and 5 divide each of them. The order of a 
+  multiplicative group modulo an RSA modulus N = p × q is (N) = (p – 1) × (q – 1)
+  which is too hard to calculate unless you know the factorization of N.
+
+- To recapitulate, this is how RSA works:
+  For key generation
+      1 Generate two large prime numbers p and q.
+      2 Choose a random public exponent e or a fixed one like e = 65537.
+      3 Your public key is the public exponent e and the public modulus N = p × q.
+      4 Derive your private exponent d = e^–1 mod (p – 1) (q – 1).
+      5 Your private key is the private exponent d.
+  For encryption, compute message^e mod N.
+  For decryption of the ciphertext, compute ciphertext^d mod N.
+
+- The PKCS#1 standard is actually the first standard based on RSA, published as part of a 
+  series of Public Key Cryptography Standard (PKCS) documents written by the RSA company in 
+  the early 90s. While the PKCS#1 standard fixes some known issues, in 1998, Bleichenbacher 
+  found a practical attack on PKCS#1 v1.5 that allowed an attacker to decrypt messages 
+  encrypted with the padding specified by the standard. As it required a million messages, 
+  it is infamously called the million message attack. 
+
+- Asymmetric encryption with RSA-OAEP
+  In 1998, version 2.0 of the same PKCS#1 standard was released with a new padding scheme for
+  RSA called Optimal Asymmetric Encryption Padding (OAEP). Unlike its predecessor, PKCS#1 v1.5,
+  OAEP is not vulnerable to Bleichenbacher’s attack and is, thus, a strong standard to use 
+  for RSA encryption nowadays
+
+- Furthermore, the design of OAEP is not perfect; better constructions have been proposed 
+  and standardized over the years. One example is RSA-KEM, which has stronger proofs of 
+  security and is much simpler to implement securely.
+
+- Hybrid encryption with ECIES
+  While there exist many hybrid encryption schemes, the most widely adopted standard is 
+  Elliptic Curve Integrated Encryption Scheme (ECIES). The scheme has been specified to be 
+  used with ECDH and is included in many standards like ANSI X9.63, ISO/IEC 18033-2, IEEE 
+  1363a, and SECG SEC 1. Unfortunately, every standard seems to implement a different 
+  variant, and different cryptographic libraries implement hybrid encryption differently,
+
+-  Summary
+  We rarely use asymmetric encryption to encrypt messages directly. This is due to the 
+   relatively low size limitations of the data that asymmetric encryption can encrypt.
+  Hybrid encryption can encrypt much larger messages by combining asymmetric encryption 
+   (or a key exchange) with a symmetric authenticated encryption algorithm.
+  The RSA PKCS#1 version 1.5 standard for asymmetric encryption is broken in most 
+   settings. Prefer the RSA-OAEP algorithm standardized in RSA PKCS#1 version 2.2.
+  ECIES is the most widely used hybrid encryption scheme. It is preferred over 
+   RSA-based schemes due to its parameter sizes and its reliance on solid standards.
+  Different cryptographic libraries might implement hybrid encryption differently. This 
+   is not a problem in practice if interoperable applications use the same implementations.
+
+
