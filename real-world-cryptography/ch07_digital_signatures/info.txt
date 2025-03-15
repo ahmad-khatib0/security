@@ -1,0 +1,55 @@
+- A signature scheme typically consists of three different algorithms:
+  A key pair generation algorithm that a signer uses to create a new private and
+   public key (the public key can then be shared with anyone).
+  A signing algorithm that takes a private key and a message to produce a signature.
+  A verifying algorithm that takes a public key, a message, and a signature and
+   returns a success or error message.
+
+- web public key infrastructure (web PKI). The web PKI is what your web browser uses to 
+  authenticate key exchanges it performs with the multitude of websites you visit every day
+
+- Interactive protocols add some non-negligible overhead as they require several messages 
+  (potentially over the network) and add unbounded delays, unless the two participants are 
+  online at the same time. Due to this, interactive ZKPs are mostly absent from the world 
+  of applied cryptography.
+
+- In 1986, Amos Fiat and Adi Shamir published a technique that allowed one to easily convert
+  an interactive ZKP into a non-interactive ZKP. The trick they introduced (referred to as 
+  the Fiat-Shamir heuristic or Fiat-Shamir transformation) was to make the prover compute 
+  the challenge themselves, in a way they can’t control
+
+- Provable security for PSS 
+  PSS (for Probabilistic Signature Scheme) is provably secure, meaning that no one should be 
+  able to forge a signature without knowledge of the private key. Instead of proving that if 
+  RSA is secure then RSA-PSS is secure, RSA-PSS proves the contrapositive: if someone can 
+  break RSA-PSS then that someone can also break RSA. That’s a common way to prove things 
+  in cryptography. Of course, this only works if RSA is secure, which we assume in the proof.
+
+- Despite the fact that both RSA-PSS and FDH come with proofs of security and are much easier 
+  to implement correctly, today most protocols still make use of RSA PKCS#1 v1.5 for 
+  signatures. This is just another example of the slowness that typically takes place 
+  around deprecating cryptographic algorithms
+
+- To compute an ECDSA (Elliptic Curve Digital Signature Algorithm) signature, you need
+  the same inputs required by a Schnorr signature: a hash of the message you’re signing 
+  (H(m)), your private key x, and a random number k that is unique per signature. 
+  An ECDSA signature is two integers, r and s, computed as follows:
+      r is the x-coordinate of [k] G
+      s equals k^–1 (H(m) + xr) mod p
+To verify an ECDSA signature, a verifier needs to use the same hashed message H(m),
+the signer’s public key, and the signature values r and s. The verifier then
+1 Computes [H(m) s^–1]G + [rs^–1]public_key
+2 Validates that the x-coordinate of the point obtained is the same as the value r
+  of the signature
+
+  RSA PKCS#1 v1.5 is still widely in use but is hard to implement correctly and
+   many implementations have been found to be broken.
+  RSA-PSS has a proof of security, is easier to implement, but has seen poor 
+   adoption due to newer schemes based on elliptic curves.
+  ECDSA is the main competition to RSA PKCS#1 v1.5 and is mostly used with NIST’s 
+   curve P-256, except in the cryptocurrency world where Secp256k1 seems to dominate.
+  Ed25519 is based on Schnorr signatures, has received wide adoption, and it is
+   easier to implement compared to ECDSA; it does not require new randomness
+   for every signing operation. This is the algorithm you should use if you can.
+
+
